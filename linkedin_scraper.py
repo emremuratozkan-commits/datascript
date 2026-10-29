@@ -51,11 +51,24 @@ def rastgele_bekle(min_sn=1.2, max_sn=2.5):
 def tarayiciyi_baslat(headless=False, logger=varsayilan_logger):
     """
     Hızlı ve kararlı Selenium WebDriver örneği başlatır.
-    Kilitlenmeleri önlemek için temiz profil ve anti-bot bayrakları kullanır.
+    Hem yerel Windows hem de Streamlit Cloud (Linux) ortamlarıyla %100 uyumludur.
     """
+    import sys
     logger("Tarayıcı hazırlanıyor...", "INFO")
     chrome_options = Options()
-    if headless:
+
+    # Streamlit Cloud (Linux) üzerinde ekran olmadığı için zorunlu headless ve flags
+    if sys.platform.startswith("linux") or os.environ.get("STREAMLIT_SERVER_PORT"):
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        # Linux Chromium binary konumu
+        for b_path in ["/usr/bin/chromium", "/usr/bin/chromium-browser"]:
+            if os.path.exists(b_path):
+                chrome_options.binary_location = b_path
+                break
+    elif headless:
         chrome_options.add_argument("--headless=new")
 
     # Temiz ve kilitlenmeyen ayarlar
